@@ -1,0 +1,40 @@
+﻿body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt {
+    white-space: normal;
+}
+.pf_img{
+    height:50px;
+    width: 50px;
+    border: none;
+}
+.loading-overlay {
+    pointer-events: all;
+    z-index: 5000;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+    cursor: wait;
+    position: fixed;
+    background: rgba(4,4,4,0.4);
+}
+
+    .loading-overlay i {
+        top: 42%;
+        left: 46%;
+        position: absolute;
+    }
+
