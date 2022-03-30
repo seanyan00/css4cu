@@ -1,0 +1,127 @@
+public async Task<MessageReply> GetDocumentStatusAsync(GetDocumentStatusRequest req)
+        {
+            var ret = new MessageReply { Message = "Complete" };
+            var appsetting = _config.GetSection("AppSettings").Get<AppSettings>();
+       
+            try
+            {
+                var postdata = new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("UserName", appsetting.DW_UserName),
+                    new KeyValuePair<string, string>("Password", appsetting.DW_Password)
+                };
+                HttpContent content = new FormUrlEncodedContent(postdata);
+            
+                var cookiejar = new CookieContainer();
+                var handler = new HttpClientHandler
+                {
+                    CookieContainer = cookiejar,
+                    UseCookies = true
+                };
+                using(var client = new HttpClient(handler))
+                {
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(
+                        new MediaTypeWithQualityHeaderValue("application/json"));
+                    client.BaseAddress = new Uri(appsetting.DW_Platform);
+
+                    var response = await client.PostAsync("Account/Logon", content);
+                    response.EnsureSuccessStatusCode();
+                    
+                    response = await client.GetAsync("FileCabinets/C8CB8902-FEF1-471C-987A-16B367F3D169");
+
+                    response.EnsureSuccessStatusCode();
+                    var jstr = await response.Content.ReadAsStringAsync();
+
+                    XDocument postdata1 = new XDocument(   
+                                            new XElement("Root",
+                                                new XElement("param1", "1010057374"),
+                                                new XElement("param2", "")
+                                             )
+                                        );
+                    var content1 = new StringContent(postdata1.ToString(), Encoding.UTF8, "text/xml");
+                 
+                    response = await client.PostAsync("FileCabinets/C8CB8902-FEF1-471C-987A-16B367F3D169/Query/DialogExpression?dialogId=CE9F2EF1-6269-442F-887D-8CB240C82872&count=2100000000", 
+                                                      content1);
+       
+                    jstr = await response.Content.ReadAsStringAsync();
+
+                    postdata = new List<KeyValuePair<string, string>>
+                    {
+                        new KeyValuePair<string, string>("param1", "1010057374"),
+                        new KeyValuePair<string, string>("param2", "")
+                    };
+                    content = new FormUrlEncodedContent(postdata);
+                    //content.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
+                    response = await client.PostAsync("FileCabinets/C8CB8902-FEF1-471C-987A-16B367F3D169/Dialogs/CE9F2EF1-6269-442F-887D-8CB240C82872/CreateUserDefinedSearch", content);
+
+                    response.EnsureSuccessStatusCode();
+                    jstr = await response.Content.ReadAsStringAsync();
+                }
+            }
+            catch(Exception ex)
+            {
+                throw;
+            }
+
+            return ret;
+        }
+    }
+
+  
+- Http: Request, POST /DW/Platform/Account/Logon 
+    Command: POST
+  - URI: /DW/Platform/Account/Logon
+     Location: /DW/Platform/Account/Logon 
+    ProtocolVersion: HTTP/1.1
+    Host:  address.com
+    Accept:  application/json
+    traceparent:  00-4c9a3c755ee9914ba5e4f1c833eaefa4-acf63c09424a004a-00
+  - ContentType:  application/x-www-form-urlencoded
+     MediaType:  application/x-www-form-urlencoded
+    ContentLength:  119
+    HeaderEnd: CRLF
+  - payload: HttpContentType =  application/x-www-form-urlencoded
+     UserName: username
+     Password: password
+    
+- Http: Request, POST /DW/Platform/FileCabinets/C8CB8902-FEF1-471C-987A-16B367F3D169/Query/DialogExpression, Query:dialogId=CE9F2EF1-6269-442F-887D-8CB240C82872&count=2100000000
+    Command: POST
+  - URI: /DW/Platform/FileCabinets/C8CB8902-FEF1-471C-987A-16B367F3D169/Query/DialogExpression?dialogId=CE9F2EF1-6269-442F-887D-8CB240C82872&count=2100000000
+     Location: /DocuWare/Platform/FileCabinets/C8CB8902-FEF1-471C-987A-16B367F3D169/Query/DialogExpression
+   - Parameters: 0x1
+      dialogId: CE9F2EF1-6269-442F-887D-8CB240C82872
+      count: 2100000000 
+    ProtocolVersion: HTTP/1.1
+    Host:  vm-dw-u.uat.crfs.crfservices.com
+    Accept:  application/json
+    traceparent:  00-f8f3fed162ec9a42988f66306443c02d-2cd3c8e0c3da144f-00
+  + Cookie:  .DWPLATFORMAUTH=AE73C84D0AD360443BEF2DB5300178365A88B2BD32E56385BC35824C389EE3FE20AA14E6483FC920784F9BB300BFA881CDDB083E785700EB7CD1045AF70DBD6F60808B99D5E68DAC0DC2E11999530692660DB7D613145A19641194DEC9F61BFE20CB7A0F989924CED601C59E9A6580890BA18D0740
+
+
+- Http: Request, POST /DW/Platform/FileCabinets/C8CB8902-FEF1-471C-987A-16B367F3D169/Dialogs/CE9F2EF1-6269-442F-887D
+    Command: POST
+  - URI: /DW/Platform/FileCabinets/C8CB8902-FEF1-471C-987A-16B367F3D169/Dialogs/CE9F2EF1-6269-442F-887D-8CB240C82872/CreateUserDefinedSearch
+     Location: /DocuWare/Platform/FileCabinets/C8CB8902-FEF1-471C-987A-16B367F3D169/Dialogs/CE9F2EF1-6269-442F-887D-8CB240C82872/CreateUserDefinedSearch 
+    ProtocolVersion: HTTP/1.1
+    Host:  address.com
+    Accept:  application/json
+    traceparent:  00-4c9a3c755ee9914ba5e4f1c833eaefa4-913d3e6afa994642-00
+  + Cookie:  .ABCAUTH=B3884B6432E461ABC
+
+
+ 
+- Http: Response, HTTP/1.1, Status: Bad request, URL: /DW/Platform/FileCabinets/C8CB8902-FEF1-471C-987A-16B367F3D169/Dialogs/CE9F2EF1-6269-442F-887D
+    ProtocolVersion: HTTP/1.1
+    StatusCode: 400, Bad request
+    Reason: Bad request
+    Cache-Control:  private, s-maxage=0
+  + ContentType:  application/json; charset=utf-8
+    Server:  Microsoft-IIS/10.0
+    XPoweredBy:  ASP.NET
+    Date:  Wed, 30 Mar 2022 12:59:01 GMT
+    ContentLength:  158
+    HeaderEnd: CRLF
+  - payload: HttpContentType =  application/json; charset=utf-8
+     HTTPPayloadLine: {"Message":"The content type header is missing. Cannot deserialize the request body.","Method":"GET","StatusCode":400,"Status":"Bad request","InternalCode":0}
+
